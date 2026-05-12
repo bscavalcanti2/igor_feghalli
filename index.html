@@ -300,6 +300,9 @@
     Essas são as cartas que o Igor ainda precisa.<br>
     Se você tiver alguma, entre em contato! 👇
   </p>
+  <p id="adminHint" style="display:none; text-align:center; color:#4ade80; font-size:0.8rem; margin-bottom:18px; opacity:0.8;">
+    ✅ A atualização é automática. Não é necessário salvar.
+  </p>
 
   <div class="collections">
     <div class="col-stack">
@@ -450,6 +453,7 @@ function renderCollection(id) {
 function render() {
   Object.keys(COLS).forEach(id => renderCollection(id));
   document.getElementById('visitorSubtitle').style.display = isAdmin ? 'none' : '';
+  document.getElementById('adminHint').style.display = isAdmin ? '' : 'none';
 }
 
 // Event delegation for admin clicks
