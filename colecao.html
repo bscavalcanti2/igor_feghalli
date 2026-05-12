@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coleção Pokémon</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #1a1a2e;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 24px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      color: #f5c518;
+      margin-bottom: 32px;
+      letter-spacing: 2px;
+      text-shadow: 0 0 12px #f5c51866;
+    }
+
+    .collections {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+      align-items: start;
+    }
+
+    .col-small {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .collection {
+      background: #16213e;
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid #0f3460;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    }
+
+    .collection-title {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+      display: inline-block;
+    }
+
+    .mega .collection-title   { background: #7b2ff7; color: #fff; }
+    .fogo .collection-title   { background: #e25822; color: #fff; }
+    .energia .collection-title { background: #0088cc; color: #fff; }
+    .pokeball .collection-title{ background: #cc2200; color: #fff; }
+    .equilibrio .collection-title { background: #2d8a4e; color: #fff; }
+
+    .items {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      padding: 5px 8px;
+      border-radius: 6px;
+      transition: background 0.15s;
+      user-select: none;
+    }
+
+    .item:hover { background: #0f3460; }
+
+    .item.checked {
+      text-decoration: line-through;
+      opacity: 0.45;
+    }
+
+    .item input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: #f5c518;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .item span {
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: #cdd6f4;
+    }
+
+    .progress {
+      font-size: 0.75rem;
+      color: #888;
+      margin-top: 12px;
+      text-align: right;
+    }
+
+    .progress span { color: #f5c518; }
+  </style>
+</head>
+<body>
+
+<h1>Pokémon — Minhas Coleções</h1>
+
+<div class="collections">
+
+  <!-- COLUNA 1: Mega + Fogo + Equilíbrio -->
+  <div class="col-small">
+
+    <div class="collection mega" id="col-mega">
+      <div class="collection-title">Mega</div>
+      <div class="items" id="items-mega"></div>
+      <div class="progress" id="prog-mega"><span>0</span> / 0</div>
+    </div>
+
+    <div class="collection fogo" id="col-fogo">
+      <div class="collection-title">Fogo</div>
+      <div class="items" id="items-fogo"></div>
+      <div class="progress" id="prog-fogo"><span>0</span> / 0</div>
+    </div>
+
+    <div class="collection equilibrio" id="col-equilibrio">
+      <div class="collection-title">Equilíbrio</div>
+      <div class="items" id="items-equilibrio"></div>
+      <div class="progress" id="prog-equilibrio"><span>0</span> / 0</div>
+    </div>
+
+  </div>
+
+  <!-- COLUNA 2: Heróis Energia -->
+  <div class="collection energia" id="col-energia">
+    <div class="collection-title">Heróis Energia</div>
+    <div class="items" id="items-energia"></div>
+    <div class="progress" id="prog-energia"><span>0</span> / 0</div>
+  </div>
+
+  <!-- COLUNA 3: Heróis Pokéball -->
+  <div class="collection pokeball" id="col-pokeball">
+    <div class="collection-title">Heróis Pokéball</div>
+    <div class="items" id="items-pokeball"></div>
+    <div class="progress" id="prog-pokeball"><span>0</span> / 0</div>
+  </div>
+
+</div>
+
+<script>
+  const DATA = {
+    mega: [
+      '025','050','073','074','075','080','081'
+    ],
+    fogo: [
+      '011','020','024','026','029','030','036','048'
+    ],
+    energia: [
+      '004','005','006','008','009','013','015','021','027','028',
+      '033','035','046','047','048','050','054','056','057','058',
+      '059','063','065','067','077','081','083','084','091','098',
+      '099','101','104','105','106','109','110','111','124','128',
+      '129','130','134','135','145','158','159','160','173'
+    ],
+    pokeball: [
+      '002','013','015','019','024','046','047','048','053','057',
+      '058','064','069','072','075','083','084','085','086','087',
+      '088','092','097','099','105','108','110','111','127','129',
+      '130','133','134','135','137','138','139','145','155','159',
+      '160','161','170','176'
+    ],
+    equilibrio: [
+      '016','017','020','021','022','027','031','032','047','048',
+      '049','052','053','064','065','066'
+    ]
+  };
+
+  function loadState(colId) {
+    try { return JSON.parse(localStorage.getItem('pkmn_' + colId) || '{}'); }
+    catch { return {}; }
+  }
+
+  function saveState(colId, state) {
+    localStorage.setItem('pkmn_' + colId, JSON.stringify(state));
+  }
+
+  function updateProgress(colId, items) {
+    const checked = items.filter(i => i.classList.contains('checked')).length;
+    const total   = items.length;
+    const prog    = document.getElementById('prog-' + colId);
+    prog.innerHTML = `<span>${checked}</span> / ${total}`;
+  }
+
+  function buildCollection(colId, numbers) {
+    const container = document.getElementById('items-' + colId);
+    const state     = loadState(colId);
+    const itemEls   = [];
+
+    numbers.forEach(num => {
+      const id  = `chk-${colId}-${num}`;
+      const div = document.createElement('div');
+      div.className = 'item' + (state[num] ? ' checked' : '');
+
+      const chk = document.createElement('input');
+      chk.type    = 'checkbox';
+      chk.id      = id;
+      chk.checked = !!state[num];
+
+      const lbl = document.createElement('span');
+      lbl.textContent = '#' + num;
+
+      div.appendChild(chk);
+      div.appendChild(lbl);
+
+      div.addEventListener('click', (e) => {
+        if (e.target !== chk) chk.checked = !chk.checked;
+        div.classList.toggle('checked', chk.checked);
+        const s = loadState(colId);
+        s[num] = chk.checked;
+        saveState(colId, s);
+        updateProgress(colId, itemEls);
+      });
+
+      container.appendChild(div);
+      itemEls.push(div);
+    });
+
+    updateProgress(colId, itemEls);
+  }
+
+  Object.entries(DATA).forEach(([id, nums]) => buildCollection(id, nums));
+</script>
+
+</body>
+</html>

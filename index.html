@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coleção Pokémon — Igor</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #1a1a2e;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 20px 20px 80px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto 28px;
+    }
+
+    .header-left { display: flex; align-items: center; gap: 12px; }
+
+    h1 {
+      font-size: 1.6rem;
+      color: #f5c518;
+      letter-spacing: 1px;
+      text-shadow: 0 0 12px #f5c51866;
+    }
+
+    .admin-badge {
+      font-size: 0.65rem;
+      background: #4ade80;
+      color: #000;
+      padding: 2px 9px;
+      border-radius: 20px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      display: none;
+    }
+
+    #adminBtn {
+      background: none;
+      border: 1px solid #444;
+      color: #888;
+      border-radius: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+    #adminBtn:hover { border-color: #f5c518; color: #f5c518; }
+    #adminBtn.active { border-color: #4ade80; color: #4ade80; }
+
+    /* Loading */
+    #loading {
+      text-align: center;
+      color: #888;
+      padding: 60px;
+      font-size: 1rem;
+    }
+
+    /* Visitor subtitle */
+    #visitorSubtitle {
+      text-align: center;
+      color: #aaa;
+      font-size: 0.9rem;
+      max-width: 1200px;
+      margin: 0 auto 22px;
+      line-height: 1.6;
+    }
+
+    /* Layout */
+    .collections {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+      align-items: start;
+    }
+
+    .col-stack { display: flex; flex-direction: column; gap: 20px; }
+
+    .collection {
+      background: #16213e;
+      border-radius: 12px;
+      padding: 18px;
+      border: 1px solid #0f3460;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    }
+
+    .collection-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .collection-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border-radius: 20px;
+      color: #fff;
+    }
+
+    .mega .collection-title     { background: #7b2ff7; }
+    .fogo .collection-title     { background: #e25822; }
+    .energia .collection-title  { background: #0088cc; }
+    .pokeball .collection-title { background: #cc2200; }
+    .equilibrio .collection-title { background: #2d8a4e; }
+
+    .col-progress {
+      font-size: 0.7rem;
+      color: #888;
+      white-space: nowrap;
+    }
+    .col-progress span { color: #f5c518; font-weight: 700; }
+
+    /* Admin items grid */
+    .items {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+    }
+
+    .item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 5px;
+      transition: background 0.12s;
+      user-select: none;
+    }
+    .item:hover { background: #0f3460; }
+    .item.checked { opacity: 0.38; text-decoration: line-through; }
+
+    .item input[type="checkbox"] {
+      width: 14px;
+      height: 14px;
+      accent-color: #f5c518;
+      pointer-events: none;
+      flex-shrink: 0;
+    }
+
+    .item span {
+      font-size: 0.83rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: #cdd6f4;
+    }
+
+    /* Visitor missing tags */
+    .missing-items { display: flex; flex-wrap: wrap; gap: 5px; }
+
+    .missing-tag {
+      background: #0f3460;
+      color: #cdd6f4;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: 1px;
+    }
+
+    .col-missing-count {
+      font-size: 0.7rem;
+      color: #e87070;
+      white-space: nowrap;
+    }
+    .col-missing-count span { font-weight: 700; }
+
+    .all-done {
+      font-size: 0.82rem;
+      color: #4ade80;
+      font-style: italic;
+    }
+
+    /* WhatsApp button */
+    #whatsBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #25D366;
+      color: #fff;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 14px;
+      border-radius: 24px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      box-shadow: 0 4px 14px rgba(37,211,102,0.45);
+      transition: transform 0.2s, box-shadow 0.2s;
+      z-index: 100;
+      white-space: nowrap;
+    }
+    #whatsBtn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(37,211,102,0.55); }
+    #whatsBtn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+    /* Admin modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.72);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal-box {
+      background: #16213e;
+      border: 1px solid #0f3460;
+      border-radius: 14px;
+      padding: 28px 28px 24px;
+      width: 300px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.65);
+      position: relative;
+    }
+
+    .modal-box h2 { color: #f5c518; margin-bottom: 20px; font-size: 1.1rem; }
+
+    .modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: none;
+      border: none;
+      color: #666;
+      font-size: 1.1rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .modal-close:hover { color: #ccc; }
+
+    .modal-box input {
+      width: 100%;
+      background: #0f3460;
+      border: 1px solid #1e4080;
+      color: #e0e0e0;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      margin-bottom: 10px;
+      outline: none;
+      display: block;
+    }
+    .modal-box input:focus { border-color: #f5c518; }
+
+    .modal-box .btn-login {
+      width: 100%;
+      background: #f5c518;
+      color: #000;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 2px;
+      transition: background 0.2s;
+    }
+    .modal-box .btn-login:hover { background: #e0b010; }
+    .modal-box .btn-login:disabled { opacity: 0.6; cursor: default; }
+
+    .login-error {
+      color: #f87171;
+      font-size: 0.8rem;
+      margin-top: 10px;
+      text-align: center;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>🎴 Coleção Pokémon — Igor</h1>
+    <span class="admin-badge" id="adminBadge">ADMIN</span>
+  </div>
+  <button id="adminBtn" title="Acesso admin">🔐</button>
+</header>
+
+<div id="loading">Carregando coleção...</div>
+
+<div id="app" style="display:none">
+  <p id="visitorSubtitle">
+    Essas são as cartas que o Igor ainda precisa.<br>
+    Se você tiver alguma, entre em contato! 👇
+  </p>
+
+  <div class="collections">
+    <div class="col-stack">
+      <div id="col-mega" class="collection mega"></div>
+      <div id="col-fogo" class="collection fogo"></div>
+      <div id="col-equilibrio" class="collection equilibrio"></div>
+    </div>
+    <div id="col-energia" class="collection energia"></div>
+    <div id="col-pokeball" class="collection pokeball"></div>
+  </div>
+</div>
+
+<!-- WhatsApp Button -->
+<a id="whatsBtn"
+   href="https://wa.me/5527996988704?text=Ol%C3%A1%20Igor!%20Vi%20sua%20lista%20e%20quero%20te%20ajudar%20a%20completar%20sua%20cole%C3%A7%C3%A3o%20de%20Pok%C3%A9mon!"
+   target="_blank" rel="noopener">
+  <svg viewBox="0 0 24 24" fill="currentColor">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+  </svg>
+  Me ajude a completar minha coleção!
+</a>
+
+<!-- Admin Modal -->
+<div id="adminModal" class="modal-overlay">
+  <div class="modal-box">
+    <button class="modal-close" id="modalClose">✕</button>
+    <h2>🔐 Login Admin</h2>
+    <input id="inputUser" type="text" placeholder="Usuário" autocomplete="username" />
+    <input id="inputPwd" type="password" placeholder="Senha" autocomplete="current-password" />
+    <button class="btn-login" id="btnLogin">Entrar</button>
+    <p class="login-error" id="loginError">Usuário ou senha inválidos.</p>
+  </div>
+</div>
+
+<script>
+const COLS = {
+  mega: {
+    title: 'Mega',
+    items: ['025','050','073','074','075','080','081']
+  },
+  fogo: {
+    title: 'Fogo',
+    items: ['011','020','024','026','029','030','036','048']
+  },
+  energia: {
+    title: 'Heróis Energia',
+    items: [
+      '004','005','006','008','009','013','015','021','027','028',
+      '033','035','046','047','048','050','054','056','057','058',
+      '059','063','065','067','077','081','083','084','091','098',
+      '099','101','104','105','106','109','110','111','124','128',
+      '129','130','134','135','145','158','159','160','173'
+    ]
+  },
+  pokeball: {
+    title: 'Heróis Pokéball',
+    items: [
+      '002','013','015','019','024','046','047','048','053','057',
+      '058','064','069','072','075','083','084','085','086','087',
+      '088','092','097','099','105','108','110','111','127','129',
+      '130','133','134','135','137','138','139','145','155','159',
+      '160','161','170','176'
+    ]
+  },
+  equilibrio: {
+    title: 'Equilíbrio',
+    items: [
+      '016','017','020','021','022','027','031','032','047','048',
+      '049','052','053','064','065','066'
+    ]
+  }
+};
+
+let state = {};
+let isAdmin = false;
+let adminPwd = '';
+
+function isChecked(col, num) {
+  return !!(state[col] && state[col][num]);
+}
+
+async function fetchState() {
+  try {
+    const r = await fetch('/api/state');
+    if (r.ok) state = await r.json();
+  } catch { /* use empty state */ }
+}
+
+async function pushState() {
+  try {
+    await fetch('/api/state', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: adminPwd, state })
+    });
+  } catch (e) { console.error('Falha ao salvar:', e); }
+}
+
+async function toggle(col, num) {
+  if (!isAdmin) return;
+  if (!state[col]) state[col] = {};
+  if (state[col][num]) {
+    delete state[col][num];
+    if (Object.keys(state[col]).length === 0) delete state[col];
+  } else {
+    state[col][num] = true;
+  }
+  renderCollection(col);
+  await pushState();
+}
+
+function renderCollection(id) {
+  const col = COLS[id];
+  const el  = document.getElementById('col-' + id);
+  const total   = col.items.length;
+  const checked = col.items.filter(n => isChecked(id, n)).length;
+  const missing = col.items.filter(n => !isChecked(id, n));
+
+  if (isAdmin) {
+    el.innerHTML = `
+      <div class="collection-header">
+        <div class="collection-title">${col.title}</div>
+        <div class="col-progress"><span>${checked}</span> / ${total}</div>
+      </div>
+      <div class="items" data-col="${id}">
+        ${col.items.map(num => `
+          <div class="item${isChecked(id, num) ? ' checked' : ''}" data-num="${num}">
+            <input type="checkbox" ${isChecked(id, num) ? 'checked' : ''}>
+            <span>#${num}</span>
+          </div>`).join('')}
+      </div>`;
+  } else {
+    el.innerHTML = `
+      <div class="collection-header">
+        <div class="collection-title">${col.title}</div>
+        ${missing.length > 0
+          ? `<div class="col-missing-count"><span>${missing.length}</span> faltando</div>`
+          : ''}
+      </div>
+      ${missing.length === 0
+        ? '<div class="all-done">✅ Completo!</div>'
+        : `<div class="missing-items">
+             ${missing.map(n => `<span class="missing-tag">#${n}</span>`).join('')}
+           </div>`}`;
+  }
+}
+
+function render() {
+  Object.keys(COLS).forEach(id => renderCollection(id));
+  document.getElementById('visitorSubtitle').style.display = isAdmin ? 'none' : '';
+}
+
+// Event delegation for admin clicks
+document.addEventListener('click', (e) => {
+  if (!isAdmin) return;
+  const item = e.target.closest('.item[data-num]');
+  if (!item) return;
+  const itemsEl = item.closest('[data-col]');
+  if (!itemsEl) return;
+  toggle(itemsEl.dataset.col, item.dataset.num);
+});
+
+// Admin modal logic
+const modal     = document.getElementById('adminModal');
+const adminBtn  = document.getElementById('adminBtn');
+const adminBadge= document.getElementById('adminBadge');
+const errEl     = document.getElementById('loginError');
+const btnLogin  = document.getElementById('btnLogin');
+
+adminBtn.addEventListener('click', () => {
+  if (isAdmin) {
+    isAdmin = false; adminPwd = '';
+    sessionStorage.removeItem('pkmn_pwd');
+    adminBtn.classList.remove('active');
+    adminBadge.style.display = 'none';
+    render();
+  } else {
+    modal.classList.add('open');
+    setTimeout(() => document.getElementById('inputUser').focus(), 50);
+  }
+});
+
+document.getElementById('modalClose').addEventListener('click', closeModal);
+modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Enter' && modal.classList.contains('open')) doLogin();
+});
+
+function closeModal() {
+  modal.classList.remove('open');
+  errEl.style.display = 'none';
+  document.getElementById('inputPwd').value = '';
+}
+
+async function doLogin() {
+  const pwd = document.getElementById('inputPwd').value;
+  errEl.style.display = 'none';
+  btnLogin.disabled = true;
+  btnLogin.textContent = 'Verificando...';
+
+  try {
+    const r = await fetch('/api/state', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pwd, ping: true })
+    });
+
+    if (r.ok) {
+      isAdmin = true; adminPwd = pwd;
+      sessionStorage.setItem('pkmn_pwd', pwd);
+      closeModal();
+      adminBtn.classList.add('active');
+      adminBadge.style.display = '';
+      render();
+    } else {
+      errEl.style.display = 'block';
+    }
+  } catch {
+    errEl.textContent = 'Erro de conexão. Tente novamente.';
+    errEl.style.display = 'block';
+  } finally {
+    btnLogin.disabled = false;
+    btnLogin.textContent = 'Entrar';
+  }
+}
+
+btnLogin.addEventListener('click', doLogin);
+
+async function tryRestoreSession() {
+  const saved = sessionStorage.getItem('pkmn_pwd');
+  if (!saved) return;
+  try {
+    const r = await fetch('/api/state', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: saved, ping: true })
+    });
+    if (r.ok) {
+      isAdmin = true; adminPwd = saved;
+      adminBtn.classList.add('active');
+      adminBadge.style.display = '';
+    }
+  } catch { /* session expired or API error */ }
+}
+
+// Init
+(async () => {
+  await fetchState();
+  await tryRestoreSession();
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display = '';
+  render();
+})();
+</script>
+
+</body>
+</html>
